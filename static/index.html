@@ -180,19 +180,29 @@ NEGOS.forEach(n=>{
 const micBtn=document.getElementById('mic'),statusEl=document.getElementById('status'),
       transcriptEl=document.getElementById('transcript'),micHint=document.getElementById('micHint');
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// iOS bloque la reconnaissance web en mode continu -> on s'appuie sur le micro du CLAVIER (fiable).
+// Android / Chrome : reconnaissance mains-libres native conservée.
+const useWebSpeech=SR&&!isIOS;
 let recog=null,listening=false,baseText='';
-if(SR){
+if(useWebSpeech){
   recog=new SR();recog.lang='fr-FR';recog.continuous=true;recog.interimResults=true;
   recog.onresult=(e)=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;transcriptEl.value=(baseText?baseText+' ':'')+t;};
   recog.onerror=(e)=>{listening=false;micBtn.classList.remove('live');
-    statusEl.innerHTML=(e.error==='not-allowed'||e.error==='service-not-allowed')?'<span class="err">Micro refusé.</span> Autorise le micro ou tape la description.':'Dictée interrompue — retouchez le micro.';};
+    statusEl.innerHTML=(e.error==='not-allowed'||e.error==='service-not-allowed')?'<span class="err">Micro refusé.</span> Autorise le micro ou tape la description.':'Dictée en pause — retouchez le micro.';};
   recog.onend=()=>{if(listening){try{recog.start();}catch(_){}}};
-}else{micHint.textContent="Dictée vocale indispo sur ce navigateur — utilise le champ texte.";micBtn.style.opacity=.5;}
+}else{
+  micHint.innerHTML=isIOS?"Sur iPhone, dicte avec le <b>🎤 de ton clavier</b> (plus fiable). Touche le micro ci-dessus : le clavier s'ouvre, puis touche le 🎤 du clavier.":"Dictée mains-libres indispo ici — tape la description ou utilise le 🎤 du clavier.";
+}
 
 micBtn.onclick=()=>{
-  if(!recog){transcriptEl.focus();return;}
-  if(listening){listening=false;recog.stop();micBtn.classList.remove('live');statusEl.textContent='En pause — relisez puis structurez';}
-  else{baseText=transcriptEl.value.trim();try{recog.start();listening=true;micBtn.classList.add('live');statusEl.innerHTML='<b>● En écoute…</b> décrivez la société';}catch(_){}}
+  if(useWebSpeech){
+    if(listening){listening=false;recog.stop();micBtn.classList.remove('live');statusEl.textContent='En pause — relisez puis structurez';}
+    else{baseText=transcriptEl.value.trim();try{recog.start();listening=true;micBtn.classList.add('live');statusEl.innerHTML='<b>● En écoute…</b> décrivez la société';}catch(_){}}
+  }else{
+    transcriptEl.focus();
+    statusEl.innerHTML='Touchez le <b>🎤 de votre clavier</b> et parlez';
+  }
 };
 
 document.querySelectorAll('#seg button').forEach(b=>{
