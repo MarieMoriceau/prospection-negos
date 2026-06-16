@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Équation · Prospection terrain</title>
+<meta name="theme-color" content="#4A1E5C">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prospection">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --aubergine:#4A1E5C;--aubergine-deep:#2E1136;--aubergine-tint:#F3EEF6;
+    --plum-line:#E4D8EA;--coral:#EC5C73;--gold:#D8A24A;
+    --bg:#FBF9FC;--card:#FFFFFF;--ink:#2A1730;--muted:#857690;--ok:#3E8E5A;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.45;-webkit-font-smoothing:antialiased;}
+  .app{max-width:460px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+  header{padding:max(18px,env(safe-area-inset-top)) 20px 14px;background:var(--aubergine);color:#fff;position:sticky;top:0;z-index:10;}
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#D9C2E3;font-weight:600;margin:0 0 2px;}
+  .wordmark{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0;display:flex;align-items:baseline;gap:7px;}
+  .wordmark .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;}
+  main{flex:1;padding:18px 16px 40px;}
+  .field-label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;display:block;}
+  .negos{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+  .nego{border:1.5px solid var(--plum-line);background:var(--card);border-radius:999px;padding:9px 15px;font-size:14px;font-weight:600;color:var(--aubergine);cursor:pointer;transition:all .15s ease;}
+  .nego.active{background:var(--aubergine);border-color:var(--aubergine);color:#fff;}
+  .immeuble{display:none;align-items:center;gap:10px;background:var(--aubergine-tint);border:1px solid var(--plum-line);border-radius:14px;padding:11px 14px;margin-bottom:18px;font-size:14px;}
+  .immeuble.show{display:flex;}
+  .immeuble .pin{font-size:18px;}
+  .immeuble .addr{font-weight:600;color:var(--aubergine-deep);flex:1;line-height:1.3;}
+  .immeuble .chg{font-size:12px;color:var(--aubergine);font-weight:600;cursor:pointer;border:none;background:none;text-decoration:underline;}
+  .dictee{background:var(--card);border:1px solid var(--plum-line);border-radius:22px;padding:24px 20px 20px;text-align:center;margin-bottom:22px;box-shadow:0 6px 24px -16px rgba(74,30,92,.4);}
+  .mic-wrap{position:relative;width:104px;height:104px;margin:4px auto 6px;}
+  .mic{width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;background:var(--aubergine);color:#fff;font-size:40px;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;transition:transform .12s ease,background .2s;}
+  .mic:active{transform:scale(.95);}
+  .mic.live{background:var(--coral);}
+  .pulse{position:absolute;inset:0;border-radius:50%;background:var(--coral);opacity:0;z-index:1;}
+  .mic.live + .pulse{animation:pulse 1.6s ease-out infinite;}
+  @keyframes pulse{0%{transform:scale(1);opacity:.45;}100%{transform:scale(1.9);opacity:0;}}
+  .mic-status{font-size:14px;color:var(--muted);font-weight:500;margin:10px 0 14px;min-height:20px;}
+  .mic-status b{color:var(--coral);}
+  textarea#transcript{width:100%;border:1px solid var(--plum-line);border-radius:14px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);resize:vertical;min-height:78px;background:var(--aubergine-tint);}
+  textarea#transcript:focus{outline:2px solid var(--aubergine);border-color:transparent;}
+  .btn{width:100%;border:none;border-radius:14px;padding:15px;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;}
+  .btn:active{transform:scale(.99);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:var(--aubergine);color:#fff;margin-top:14px;}
+  .btn-gold{background:linear-gradient(100deg,var(--gold),#E9B968);color:var(--aubergine-deep);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .spinner{width:16px;height:16px;border:2.5px solid rgba(46,17,54,.25);border-top-color:var(--aubergine-deep);border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .loading .spinner{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .fiche{margin-top:6px;}
+  .fiche h2{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.01em;margin:0 0 4px;color:var(--aubergine-deep);}
+  .correct-hint{font-size:13px;color:var(--aubergine);background:var(--aubergine-tint);border-radius:10px;padding:9px 12px;margin:0 0 14px;line-height:1.4;}
+  .correct-hint b{font-weight:600;}
+  details.dictee-ref{border:1px dashed var(--plum-line);border-radius:12px;margin-bottom:18px;background:#fff;}
+  details.dictee-ref summary{cursor:pointer;padding:11px 14px;font-size:13px;font-weight:600;color:var(--muted);list-style:none;}
+  details.dictee-ref summary::-webkit-details-marker{display:none;}
+  details.dictee-ref summary::before{content:'🎙️ ';}
+  details.dictee-ref[open] summary{border-bottom:1px dashed var(--plum-line);}
+  details.dictee-ref .raw{padding:12px 14px;font-size:14px;color:var(--ink);font-style:italic;line-height:1.5;}
+  .row{margin-bottom:15px;opacity:0;transform:translateY(8px);}
+  .row.show{animation:rise .4s ease forwards;}
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+  .row label{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;}
+  .row input,.row textarea{width:100%;border:1px solid var(--plum-line);border-radius:12px;padding:12px 14px;font-family:inherit;font-size:15px;color:var(--ink);background:var(--card);}
+  .row input:focus,.row textarea:focus{outline:2px solid var(--aubergine);border-color:transparent;}
+  .row textarea{resize:vertical;min-height:70px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .filled input,.filled textarea{background:#FAF6FC;border-color:#D8C3E2;}
+  .seg{display:flex;gap:8px;}
+  .seg button{flex:1;border:1.5px solid var(--plum-line);background:var(--card);border-radius:12px;padding:11px;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .seg button.on[data-v="Oui"]{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .seg button.on[data-v="Non"]{background:var(--aubergine-deep);border-color:var(--aubergine-deep);color:#fff;}
+  .seg button.on[data-v="À voir"]{background:var(--muted);border-color:var(--muted);color:#fff;}
+  .saved{background:var(--aubergine-tint);border:1px solid var(--plum-line);border-radius:18px;padding:22px;text-align:center;margin-top:6px;}
+  .saved .check{width:54px;height:54px;border-radius:50%;background:var(--ok);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+  .saved h3{font-family:'Bricolage Grotesque',sans-serif;margin:0 0 6px;color:var(--aubergine-deep);font-size:19px;}
+  .saved p{margin:0 0 16px;color:var(--muted);font-size:14px;}
+  .saved p a{color:var(--aubergine);font-weight:600;}
+  .recap{text-align:left;background:#fff;border:1px solid var(--plum-line);border-radius:12px;padding:14px 16px;font-size:13.5px;color:var(--ink);}
+  .recap div{padding:4px 0;border-bottom:1px dashed var(--plum-line);}
+  .recap div:last-child{border:none;}
+  .recap b{color:var(--aubergine);font-weight:600;}
+  .btn-ghost{background:none;color:var(--aubergine);border:1.5px solid var(--plum-line);margin-top:12px;}
+  .hint{font-size:12px;color:var(--muted);text-align:center;margin:10px 4px 0;line-height:1.5;}
+  .err{color:var(--coral);font-weight:600;}
+  .hidden{display:none !important;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--aubergine-deep);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .25s;z-index:50;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <p class="eyebrow">Prospection terrain</p>
+    <h1 class="wordmark">Équation<span class="dot"></span></h1>
+  </header>
+
+  <main>
+    <span class="field-label" id="negoLbl">Négociateur</span>
+    <div class="negos" id="negos"></div>
+
+    <div class="immeuble" id="immeubleBar">
+      <span class="pin">📍</span>
+      <span class="addr" id="immeubleAddr"></span>
+      <button class="chg" id="changeImm">changer</button>
+    </div>
+
+    <section class="dictee" id="dicteeCard">
+      <div class="mic-wrap">
+        <button class="mic" id="mic" aria-label="Dicter">🎙️</button>
+        <span class="pulse"></span>
+      </div>
+      <p class="mic-status" id="status">Décrivez UNE société</p>
+      <textarea id="transcript" placeholder="Ex : 3e étage, Mercier Conseil. J'ai parlé à Léa Mercier. Ils cherchent plus grand, environ 400 m². Bureaux un peu vieillissants, bonne ambiance."></textarea>
+      <button class="btn btn-gold" id="structurer">
+        <span class="spinner"></span><span class="lbl">✨ Structurer avec l'IA</span>
+      </button>
+      <p class="hint" id="micHint"></p>
+    </section>
+
+    <section class="fiche hidden" id="fiche">
+      <h2>Fiche société</h2>
+      <p class="correct-hint">Un mot mal entendu ? <b>Touchez le champ et corrigez</b> — au clavier, ou au micro du clavier. Les noms de société et de personne sont les plus à vérifier.</p>
+      <details class="dictee-ref"><summary>Voir ce que tu as dicté</summary><div class="raw" id="rawDictee"></div></details>
+
+      <div class="row" data-r><label>Adresse de l'immeuble</label><input id="f_adresse" type="text" placeholder="ex : 11 boulevard de Sébastopol, 75001"></div>
+      <div class="grid2">
+        <div class="row" data-r><label>Étage</label><input id="f_etage" type="text"></div>
+        <div class="row" data-r><label>Société</label><input id="f_societe" type="text"></div>
+      </div>
+      <div class="row" data-r><label>Personne rencontrée</label><input id="f_personne" type="text" placeholder="si récupéré"></div>
+      <div class="row" data-r>
+        <label>En recherche de bureaux ?</label>
+        <div class="seg" id="seg">
+          <button data-v="Oui">Oui</button>
+          <button data-v="Non">Non</button>
+          <button data-v="À voir">À voir</button>
+        </div>
+      </div>
+      <div class="row" data-r><label>Remarques</label><textarea id="f_remarques"></textarea></div>
+
+      <button class="btn btn-primary" id="save">Enregistrer la fiche</button>
+    </section>
+
+    <section class="saved hidden" id="saved">
+      <div class="check">✓</div>
+      <h3 id="savedTitle">Fiche enregistrée</h3>
+      <p id="savedMsg">Envoyée dans Notion.</p>
+      <div class="recap" id="recap"></div>
+      <button class="btn btn-gold" id="next">➕ Société suivante · même immeuble</button>
+      <button class="btn btn-ghost" id="newImm">Nouvel immeuble</button>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const NEGOS=[{code:'MBU',nom:'Marine'},{code:'LBA',nom:'Lionel'},{code:'RAK',nom:'Richard'},{code:'NV',nom:'Nicolas'}];
+let negoActif=null, recherche='', adresseImmeuble='', compteur=0;
+
+const negosEl=document.getElementById('negos');
+NEGOS.forEach(n=>{
+  const b=document.createElement('button');
+  b.className='nego';b.textContent=n.nom;
+  b.onclick=()=>{negoActif=n;document.querySelectorAll('.nego').forEach(x=>x.classList.remove('active'));b.classList.add('active');};
+  negosEl.appendChild(b);
+});
+
+// Web Speech
+const micBtn=document.getElementById('mic'),statusEl=document.getElementById('status'),
+      transcriptEl=document.getElementById('transcript'),micHint=document.getElementById('micHint');
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null,listening=false,baseText='';
+if(SR){
+  recog=new SR();recog.lang='fr-FR';recog.continuous=true;recog.interimResults=true;
+  recog.onresult=(e)=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;transcriptEl.value=(baseText?baseText+' ':'')+t;};
+  recog.onerror=(e)=>{listening=false;micBtn.classList.remove('live');
+    statusEl.innerHTML=(e.error==='not-allowed'||e.error==='service-not-allowed')?'<span class="err">Micro refusé.</span> Autorise le micro ou tape la description.':'Dictée interrompue — retouchez le micro.';};
+  recog.onend=()=>{if(listening){try{recog.start();}catch(_){}}};
+}else{micHint.textContent="Dictée vocale indispo sur ce navigateur — utilise le champ texte.";micBtn.style.opacity=.5;}
+
+micBtn.onclick=()=>{
+  if(!recog){transcriptEl.focus();return;}
+  if(listening){listening=false;recog.stop();micBtn.classList.remove('live');statusEl.textContent='En pause — relisez puis structurez';}
+  else{baseText=transcriptEl.value.trim();try{recog.start();listening=true;micBtn.classList.add('live');statusEl.innerHTML='<b>● En écoute…</b> décrivez la société';}catch(_){}}
+};
+
+document.querySelectorAll('#seg button').forEach(b=>{
+  b.onclick=()=>{recherche=b.dataset.v;document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+});
+
+// Structuration (backend)
+const structBtn=document.getElementById('structurer'),ficheEl=document.getElementById('fiche');
+structBtn.onclick=async()=>{
+  const texte=transcriptEl.value.trim();
+  if(!texte){statusEl.innerHTML='<span class="err">Dicte ou écris d\'abord.</span>';return;}
+  if(listening){listening=false;recog.stop();micBtn.classList.remove('live');}
+  structBtn.classList.add('loading');structBtn.disabled=true;structBtn.querySelector('.lbl').textContent='Lecture…';
+  try{
+    const res=await fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({transcript:texte,adresse_connue:adresseImmeuble})});
+    const d=await res.json();
+    if(!res.ok) throw new Error(d.error||'erreur');
+    remplirFiche(d);
+  }catch(err){console.error(err);statusEl.innerHTML='<span class="err">IA indisponible. Remplis à la main.</span>';ficheEl.classList.remove('hidden');revealRows();}
+  finally{structBtn.classList.remove('loading');structBtn.disabled=false;structBtn.querySelector('.lbl').textContent='✨ Structurer avec l\'IA';}
+};
+
+function setVal(id,v){const el=document.getElementById(id);el.value=v||'';if(v)el.closest('.row').classList.add('filled');}
+function remplirFiche(d){
+  document.getElementById('rawDictee').textContent='« '+transcriptEl.value.trim()+' »';
+  if(d.adresse) adresseImmeuble=d.adresse;
+  setVal('f_adresse',adresseImmeuble||d.adresse);
+  setVal('f_etage',d.etage);setVal('f_societe',d.societe);setVal('f_personne',d.personne);setVal('f_remarques',d.remarques);
+  recherche=(d.recherche==='Oui'||d.recherche==='Non')?d.recherche:'';
+  document.querySelectorAll('#seg button').forEach(b=>{b.classList.toggle('on',b.dataset.v===recherche);});
+  ficheEl.classList.remove('hidden');revealRows();ficheEl.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function revealRows(){document.querySelectorAll('.fiche [data-r]').forEach((r,i)=>setTimeout(()=>r.classList.add('show'),i*70));}
+
+const val=id=>document.getElementById(id).value.trim();
+const toggle=(ids,hide)=>ids.forEach(id=>document.getElementById(id).classList.toggle('hidden',hide));
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+
+// Enregistrer (backend -> Notion)
+const saveBtn=document.getElementById('save');
+saveBtn.onclick=async()=>{
+  if(!negoActif){toast('Choisis d\'abord ton prénom en haut.');return;}
+  if(!val('f_societe')){toast('Il manque le nom de la société.');return;}
+  adresseImmeuble=val('f_adresse')||adresseImmeuble;
+  saveBtn.disabled=true;saveBtn.textContent='Envoi…';
+  const fiche={societe:val('f_societe'),adresse:val('f_adresse'),etage:val('f_etage'),
+    personne:val('f_personne'),recherche:recherche,remarques:val('f_remarques'),
+    nego:negoActif.nom,date:new Date().toISOString().slice(0,10)};
+  try{
+    const res=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fiche)});
+    const d=await res.json();
+    if(!res.ok) throw new Error((d.detail&&d.detail.message)||d.error||'refus Notion');
+    afficherConfirmation(fiche,d.url);
+  }catch(err){console.error(err);toast('Échec de l\'envoi : '+err.message);}
+  finally{saveBtn.disabled=false;saveBtn.textContent='Enregistrer la fiche';}
+};
+
+function afficherConfirmation(f,url){
+  compteur++;
+  const champs={'Négo':f.nego,'Adresse':f.adresse,'Étage':f.etage,'Société':f.societe,
+    'Personne':f.personne,'Recherche':f.recherche||'à voir','Remarques':f.remarques};
+  document.getElementById('recap').innerHTML=Object.entries(champs).filter(([k,v])=>v).map(([k,v])=>`<div><b>${k}</b> · ${v}</div>`).join('');
+  document.getElementById('savedTitle').textContent=`Fiche enregistrée · ${compteur} pour cet immeuble`;
+  document.getElementById('savedMsg').innerHTML=url?`Envoyée dans Notion · <a href="${url}" target="_blank">ouvrir la fiche</a>`:'Envoyée dans Notion.';
+  document.getElementById('immeubleAddr').textContent=adresseImmeuble||'Adresse non renseignée';
+  toggle(['fiche','dicteeCard'],true);toggle(['saved'],false);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('next').onclick=()=>{
+  ['f_etage','f_societe','f_personne','f_remarques','transcript'].forEach(id=>document.getElementById(id).value='');
+  setVal('f_adresse',adresseImmeuble);
+  recherche='';document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.row').forEach(r=>r.classList.remove('show','filled'));
+  document.getElementById('f_adresse').closest('.row').classList.add('filled');
+  document.getElementById('immeubleBar').classList.add('show');
+  toggle(['saved','fiche'],true);toggle(['dicteeCard'],false);
+  statusEl.textContent='Société suivante — même immeuble';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+document.getElementById('changeImm').onclick=()=>document.getElementById('newImm').click();
+document.getElementById('newImm').onclick=()=>{
+  adresseImmeuble='';compteur=0;recherche='';
+  ['f_adresse','f_etage','f_societe','f_personne','f_remarques','transcript'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.row').forEach(r=>r.classList.remove('show','filled'));
+  document.getElementById('immeubleBar').classList.remove('show');
+  toggle(['saved','fiche'],true);toggle(['dicteeCard'],false);
+  statusEl.textContent='Décrivez UNE société';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
+// Service worker (PWA installable)
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+</script>
+</body>
+</html>
