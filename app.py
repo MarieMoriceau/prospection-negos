@@ -97,14 +97,18 @@ def submit():
 
     props = {"Société": {"title": [{"text": {"content": societe}}]}}
     for key, col in [("adresse", "Adresse"), ("etage", "Étage"),
-                     ("personne", "Personne"), ("remarques", "Remarques")]:
+                     ("personne", "Personne"), ("remarques", "Remarques"),
+                     ("campagne", "Campagne")]:
         val = _rich((d.get(key) or "").strip())
         if val:
             props[col] = val
     if d.get("recherche") in ("Oui", "Non", "À voir"):
         props["En recherche"] = {"select": {"name": d["recherche"]}}
+    if d.get("type_societe") in ("Yes", "CFN", "Autre"):
+        props["Type de société"] = {"select": {"name": d["type_societe"]}}
     if d.get("nego"):
         props["Négo"] = {"select": {"name": d["nego"]}}
+    props["Action à prévoir"] = {"checkbox": bool(d.get("action"))}
     props["Date de visite"] = {"date": {"start": date_iso}}
 
     try:
