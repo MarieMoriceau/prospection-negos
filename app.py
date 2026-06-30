@@ -104,7 +104,7 @@ def submit():
             props[col] = val
     if d.get("recherche") in ("Oui", "Non", "À voir"):
         props["En recherche"] = {"select": {"name": d["recherche"]}}
-    if d.get("type_societe") in ("Yes", "CFN", "Autre"):
+    if d.get("type_societe") in ("Yes", "CFN", "Autre", "Flex"):
         props["Type de société"] = {"select": {"name": d["type_societe"]}}
     if d.get("nego"):
         props["Négo"] = {"select": {"name": d["nego"]}}
