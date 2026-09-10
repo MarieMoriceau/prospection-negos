@@ -162,7 +162,7 @@
           <button data-t="Yes">Yes</button>
           <button data-t="CFN">CFN</button>
           <button data-t="Autre">Autre</button>
-          <button data-t="Flex">Flex</button>
+          <button data-t="flex">Flex</button>
         </div>
       </div>
       <div class="row" data-r>
@@ -182,13 +182,13 @@
       <button class="btn btn-gold" id="next">➕ Société suivante · même immeuble</button>
       <button class="btn btn-ghost" id="newImm">Nouvel immeuble</button>
     </section>
-    <p class="ver">Prospection terrain — v30/06 · Yes · CFN · Autre · Flex</p>
+    <p class="ver">Prospection terrain — v30/06-2 · négos : Marine · Lionel · Richard · Sébastien</p>
   </main>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-const NEGOS=[{code:'MBU',nom:'Marine'},{code:'LBA',nom:'Lionel'},{code:'RAK',nom:'Richard'},{code:'NV',nom:'Nicolas'}];
+const NEGOS=[{code:'MBU',nom:'Marine'},{code:'LBA',nom:'Lionel'},{code:'RAK',nom:'Richard'},{code:'SPI',nom:'Sébastien'}];
 let negoActif=null, recherche='', adresseImmeuble='', compteur=0, typeSoc='', actionAprevoir=false;
 
 const negosEl=document.getElementById('negos');
