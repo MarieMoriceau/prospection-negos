@@ -170,6 +170,10 @@
         <button class="toggle-btn" id="actionBtn" type="button">Non</button>
       </div>
       <div class="row" data-r><label>Remarques</label><textarea id="f_remarques"></textarea></div>
+      <div class="row" data-r>
+        <label>Y retourner ?</label>
+        <button class="toggle-btn" id="retourBtn" type="button">Non</button>
+      </div>
 
       <button class="btn btn-primary" id="save">Enregistrer la fiche</button>
     </section>
@@ -182,14 +186,14 @@
       <button class="btn btn-gold" id="next">➕ Société suivante · même immeuble</button>
       <button class="btn btn-ghost" id="newImm">Nouvel immeuble</button>
     </section>
-    <p class="ver">Prospection terrain — v30/06-2 · négos : Marine · Lionel · Richard · Sébastien</p>
+    <p class="ver">Prospection terrain — v26/10 · + case « Y retourner »</p>
   </main>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 const NEGOS=[{code:'MBU',nom:'Marine'},{code:'LBA',nom:'Lionel'},{code:'RAK',nom:'Richard'},{code:'SPI',nom:'Sébastien'}];
-let negoActif=null, recherche='', adresseImmeuble='', compteur=0, typeSoc='', actionAprevoir=false;
+let negoActif=null, recherche='', adresseImmeuble='', compteur=0, typeSoc='', actionAprevoir=false, yRetour=false;
 
 const negosEl=document.getElementById('negos');
 NEGOS.forEach(n=>{
@@ -236,6 +240,8 @@ document.querySelectorAll('#segType button').forEach(b=>{
 });
 const actionBtn=document.getElementById('actionBtn');
 actionBtn.onclick=()=>{actionAprevoir=!actionAprevoir;actionBtn.classList.toggle('on',actionAprevoir);actionBtn.textContent=actionAprevoir?'Oui':'Non';};
+const retourBtn=document.getElementById('retourBtn');
+retourBtn.onclick=()=>{yRetour=!yRetour;retourBtn.classList.toggle('on',yRetour);retourBtn.textContent=yRetour?'Oui':'Non';};
 
 // Structuration (backend)
 const structBtn=document.getElementById('structurer'),ficheEl=document.getElementById('fiche');
@@ -279,7 +285,7 @@ saveBtn.onclick=async()=>{
   saveBtn.disabled=true;saveBtn.textContent='Envoi…';
   const fiche={societe:val('f_societe'),adresse:val('f_adresse'),etage:val('f_etage'),
     personne:val('f_personne'),recherche:recherche,remarques:val('f_remarques'),
-    type_societe:typeSoc,campagne:val('campagne'),action:actionAprevoir,
+    type_societe:typeSoc,campagne:val('campagne'),action:actionAprevoir,y_retourner:yRetour,
     nego:negoActif.nom,date:new Date().toISOString().slice(0,10)};
   try{
     const res=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fiche)});
@@ -294,7 +300,7 @@ function afficherConfirmation(f,url){
   compteur++;
   const champs={'Campagne':f.campagne,'Négo':f.nego,'Adresse':f.adresse,'Étage':f.etage,'Société':f.societe,
     'Type':f.type_societe,'Personne':f.personne,'Recherche':f.recherche||'à voir',
-    'Action à prévoir':f.action?'Oui':'Non','Remarques':f.remarques};
+    'Action à prévoir':f.action?'Oui':'Non','Y retourner':f.y_retourner?'Oui':'Non','Remarques':f.remarques};
   document.getElementById('recap').innerHTML=Object.entries(champs).filter(([k,v])=>v).map(([k,v])=>`<div><b>${k}</b> · ${v}</div>`).join('');
   document.getElementById('savedTitle').textContent=`Fiche enregistrée · ${compteur} pour cet immeuble`;
   document.getElementById('savedMsg').innerHTML=url?`Envoyée dans Notion · <a href="${url}" target="_blank">ouvrir la fiche</a>`:'Envoyée dans Notion.';
@@ -306,7 +312,7 @@ function afficherConfirmation(f,url){
 document.getElementById('next').onclick=()=>{
   ['f_etage','f_societe','f_personne','f_remarques','transcript'].forEach(id=>document.getElementById(id).value='');
   setVal('f_adresse',adresseImmeuble);
-  recherche='';document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));typeSoc='';actionAprevoir=false;document.querySelectorAll('#segType button').forEach(b=>b.classList.remove('on'));var _ab=document.getElementById('actionBtn');if(_ab){_ab.classList.remove('on');_ab.textContent='Non';}
+  recherche='';document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));typeSoc='';actionAprevoir=false;document.querySelectorAll('#segType button').forEach(b=>b.classList.remove('on'));var _ab=document.getElementById('actionBtn');if(_ab){_ab.classList.remove('on');_ab.textContent='Non';}yRetour=false;var _rb=document.getElementById('retourBtn');if(_rb){_rb.classList.remove('on');_rb.textContent='Non';}
   document.querySelectorAll('.row').forEach(r=>r.classList.remove('show','filled'));
   document.getElementById('f_adresse').closest('.row').classList.add('filled');
   document.getElementById('immeubleBar').classList.add('show');
@@ -318,7 +324,7 @@ document.getElementById('changeImm').onclick=()=>document.getElementById('newImm
 document.getElementById('newImm').onclick=()=>{
   adresseImmeuble='';compteur=0;recherche='';
   ['f_adresse','f_etage','f_societe','f_personne','f_remarques','transcript'].forEach(id=>document.getElementById(id).value='');
-  document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));typeSoc='';actionAprevoir=false;document.querySelectorAll('#segType button').forEach(b=>b.classList.remove('on'));var _ab=document.getElementById('actionBtn');if(_ab){_ab.classList.remove('on');_ab.textContent='Non';}
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.remove('on'));typeSoc='';actionAprevoir=false;document.querySelectorAll('#segType button').forEach(b=>b.classList.remove('on'));var _ab=document.getElementById('actionBtn');if(_ab){_ab.classList.remove('on');_ab.textContent='Non';}yRetour=false;var _rb=document.getElementById('retourBtn');if(_rb){_rb.classList.remove('on');_rb.textContent='Non';}
   document.querySelectorAll('.row').forEach(r=>r.classList.remove('show','filled'));
   document.getElementById('immeubleBar').classList.remove('show');
   toggle(['saved','fiche'],true);toggle(['dicteeCard'],false);
