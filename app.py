@@ -110,6 +110,7 @@ def submit():
         props["Négo"] = {"select": {"name": d["nego"]}}
     props["Action à prévoir"] = {"checkbox": bool(d.get("action"))}
     props["Y retourner"] = {"checkbox": bool(d.get("y_retourner"))}
+    props["Vu"] = {"checkbox": bool(d.get("vu"))}
     props["Date de visite"] = {"date": {"start": date_iso}}
 
     try:
