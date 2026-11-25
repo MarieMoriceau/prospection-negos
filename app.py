@@ -102,7 +102,7 @@ def submit():
         val = _rich((d.get(key) or "").strip())
         if val:
             props[col] = val
-    if d.get("recherche") in ("Oui", "Non", "nez qui bouge"):
+    if d.get("recherche") in ("Oui", "Non", "Nez qui bouge"):
         props["En recherche"] = {"select": {"name": d["recherche"]}}
     if d.get("type_societe") in ("Yes", "CFN", "Autre", "flex"):
         props["Type de société"] = {"select": {"name": d["type_societe"]}}
