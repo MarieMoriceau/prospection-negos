@@ -80,7 +80,7 @@
   .seg button{flex:1;border:1.5px solid var(--plum-line);background:var(--card);border-radius:12px;padding:11px;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
   .seg button.on[data-v="Oui"]{background:var(--ok);border-color:var(--ok);color:#fff;}
   .seg button.on[data-v="Non"]{background:var(--aubergine-deep);border-color:var(--aubergine-deep);color:#fff;}
-  .seg button.on[data-v="À voir"]{background:var(--muted);border-color:var(--muted);color:#fff;}
+  .seg button.on[data-v="nez qui bouge"]{background:var(--muted);border-color:var(--muted);color:#fff;}
   #segType button.on{background:var(--aubergine);border-color:var(--aubergine);color:#fff;}
   .campagne-input{width:100%;border:1.5px solid var(--plum-line);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:15px;color:var(--ink);background:var(--card);margin-bottom:18px;}
   .campagne-input:focus{outline:2px solid var(--aubergine);border-color:transparent;}
@@ -148,7 +148,7 @@
         <div class="row" data-r><label>Société</label><input id="f_societe" type="text"></div>
       </div>
       <div class="row" data-r>
-        <label>Vu ?</label>
+        <label>J'ai eu un échange avec le prospect ?</label>
         <button class="toggle-btn" id="vuBtn" type="button">Non</button>
       </div>
       <div class="row" data-r><label>Personne rencontrée</label><input id="f_personne" type="text" placeholder="si récupéré"></div>
@@ -157,7 +157,7 @@
         <div class="seg" id="seg">
           <button data-v="Oui">Oui</button>
           <button data-v="Non">Non</button>
-          <button data-v="À voir">À voir</button>
+          <button data-v="nez qui bouge">nez qui bouge</button>
         </div>
       </div>
       <div class="row" data-r>
@@ -190,7 +190,7 @@
       <button class="btn btn-gold" id="next">➕ Société suivante · même immeuble</button>
       <button class="btn btn-ghost" id="newImm">Nouvel immeuble</button>
     </section>
-    <p class="ver">Prospection terrain — v03/11 · + case « Vu »</p>
+    <p class="ver">Prospection terrain — v25/11 · échange prospect · nez qui bouge</p>
   </main>
 </div>
 <div class="toast" id="toast"></div>
@@ -305,7 +305,7 @@ saveBtn.onclick=async()=>{
 function afficherConfirmation(f,url){
   compteur++;
   const champs={'Campagne':f.campagne,'Négo':f.nego,'Adresse':f.adresse,'Étage':f.etage,'Société':f.societe,'Vu':f.vu?'Oui':'Non',
-    'Type':f.type_societe,'Personne':f.personne,'Recherche':f.recherche||'à voir',
+    'Type':f.type_societe,'Personne':f.personne,'Recherche':f.recherche||'nez qui bouge',
     'Action à prévoir':f.action?'Oui':'Non','Y retourner':f.y_retourner?'Oui':'Non','Remarques':f.remarques};
   document.getElementById('recap').innerHTML=Object.entries(champs).filter(([k,v])=>v).map(([k,v])=>`<div><b>${k}</b> · ${v}</div>`).join('');
   document.getElementById('savedTitle').textContent=`Fiche enregistrée · ${compteur} pour cet immeuble`;
